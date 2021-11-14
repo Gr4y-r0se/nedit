@@ -1,14 +1,15 @@
-# nedit
-###A nessus editor/parser/querior for the exasperated pentester. 
+# nedit.rb
+### A nessus editor/parser/querior for the exasperated pentester. 
 NB: Nothing to do with NEdit, the open source text editor - but the name was too good to pass up.
 
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-░░░░░░░░░╔═╦╗░░╔╦╦╗░░░░░░░░░░
-░░░░░░░░░║║║╠═╦╝╠╣╚╗░░░░░░░░░
-░░░░░░░░░║║║║╩╣╬║║╔╣░░░░░░░░░
-░░░░░░░░░╚╩═╩═╩═╩╩═╝░░░░░░░░░
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
+<pre><code>░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 
+░░░░░░░░░╔═╦╗░░╔╦╦╗░░░░░░░░░░  
+░░░░░░░░░║║║╠═╦╝╠╣╚╗░░░░░░░░░ 
+░░░░░░░░░║║║║╩╣╬║║╔╣░░░░░░░░░ 
+░░░░░░░░░╚╩═╩═╩═╩╩═╝░░░░░░░░░ 
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 
+Nedit - The nessus file editor and processor
+</code></pre>
 ## How to use
 
 <img src='./images/help.png'>
