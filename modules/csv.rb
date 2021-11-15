@@ -10,9 +10,9 @@ def csv(file_)
 	lst = doc.xpath('//ReportItem')
 
 	#My gin addled brain needed this so I could make sense of the nested hash value:
-	# [0 - CVE],[1 - CVSS 3 score],[2 - Risk/Severity],[3 - Ip address],[4 - Protocol],[5 - Port],[6- Description],[7 - Remediation],[8 - External References],[9 - plugin output],[10 - hostname]
+	# [0 - CVE],[1 - CVSS 3 score],[2 - Risk/Severity],[3 - Ip address],[4 - Protocol],[5 - Port],[6- Description],[7 - Remediation],[8 - External References],[9 - plugin output],[10 - hostname],[11 - rdns]
 
-	for i in lst do vulns[i['pluginName']] ||= [[],[],[],[],[],[],[],[],[],[],[]] if i['severity'] !=  '0' end  #This declares a default value for all the vulnerabilites, which we will later populate
+	for i in lst do vulns[i['pluginName']] ||= [[],[],[],[],[],[],[],[],[],[],[],[]] if i['severity'] !=  '0' end  #This declares a default value for all the vulnerabilites, which we will later populate
 	 
 
 	vulns.each do |vuln , values|
@@ -38,6 +38,14 @@ def csv(file_)
 					values[10].push(hostname)
 				else 
 					values[10].push("N/A")
+				end
+			end
+			for it in parent_element.xpath('.//tag[@name="host-rdns"]') do
+				hostname = it.xpath('text()')
+				if hostname != '' then 
+					values[11].push(hostname)
+				else 
+					values[11].push("N/A")
 				end
 			end
 		end
@@ -68,12 +76,12 @@ def csv(file_)
 
 	file.close
 
-	writeable = ['"Vulnerability","CVE","CVSS 3 score","Risk/Severity","IP address","Hostname","Protocol","Ports","Description","Remediation","External References","Plugin Output"']
+	writeable = ['"Vulnerability","CVE","CVSS 3 score","Risk/Severity","IP address","Hostname","rDNS","Protocol","Ports","Description","Remediation","External References","Plugin Output"']
 
 	filename = "#{file_.rpartition('.')[0]}.csv"
 
 	vulns.each do |vuln , values|
-		writeable.push(%Q("#{vuln}","#{values[0].join("\n")}","#{values[1]}","#{values[2]}","#{values[3].join("\n")}","#{values[10].join("\n")}","#{values[4].join("\n")}","#{values[5].join("\n")}","#{values[6]}","#{values[7]}","#{values[8].uniq.join("\n")}","#{values[9].uniq.join("\n")}"))
+		writeable.push(%Q("#{vuln}","#{values[0].join("\n")}","#{values[1]}","#{values[2]}","#{values[3].join("\n")}","#{values[10].join("\n")}","#{values[11].join("\n")}","#{values[4].join("\n")}","#{values[5].join("\n")}","#{values[6]}","#{values[7]}","#{values[8].uniq.join("\n")}","#{values[9].uniq.join("\n")}"))
 	end
 
 	File.write(filename,writeable.join("\n"))
