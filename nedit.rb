@@ -1,4 +1,4 @@
-['faraday','erb','json','colorize','optimist'].each(&method(:require))
+['faraday','erb','colorize','optimist'].each(&method(:require))
 
 require_relative 'modules/csv'
 require_relative 'modules/targets'
