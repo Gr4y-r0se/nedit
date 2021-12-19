@@ -1,4 +1,4 @@
-['colorize','optimist'].each(&method(:require))
+['faraday','erb','json','colorize','optimist'].each(&method(:require))
 
 require_relative 'modules/csv'
 require_relative 'modules/targets'
@@ -6,6 +6,7 @@ require_relative 'modules/hostnames'
 require_relative 'modules/ports'
 require_relative 'modules/edit'
 require_relative 'modules/info'
+require_relative 'modules/online'
 
 
 #Parse commands, and display banner
@@ -16,8 +17,9 @@ banner File.read('modules/banner.txt')
   opt :csv, "Nessus CSV Output - ITHC report annexe compatible", :default => false
   opt :targets, "Outputs the list of targets in the file", :default => false
   opt :hosts, "Outputs the list of targets and their hostnames (if availble)", :default => false
-  opt :ports, "Outputs the list of targets and all the ports detected on that target", :default => false
-  opt :edit, "Opens edit mode (type exit to close)", :default => false 
+  opt :ports, "Outputs the lsist of targets and all the ports detected on that target", :default => false
+  opt :edit, "Opens edit mode (type exit to close)", :default => false
+  opt :online, "Shows all targets and if they are online or not", :default => false 
   opt :info, "Removes the informational findings from nessus files", :default => false 
   opt :file, "Specify the nessus file", :type => String
 end
@@ -29,6 +31,15 @@ if opts[:info] then
   info(opts[:file]) 
   puts "\n\n====Info Removal====\nNessus file has been updated and is here: #{opts[:file]}"
 end
+
+if opts[:online] then 
+  you_up = online(opts[:file]) 
+  puts "\n\n====Online====\n\n"
+  you_up.each do |i|
+    puts i
+  end
+end
+
 
 if opts[:edit] then edit_mode(opts[:file]) end
 
