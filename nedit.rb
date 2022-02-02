@@ -7,6 +7,7 @@ require_relative 'modules/ports'
 require_relative 'modules/edit'
 require_relative 'modules/info'
 require_relative 'modules/online'
+require_relative 'modules/scope'
 
 
 #Parse commands, and display banner
@@ -20,6 +21,7 @@ banner File.read('modules/banner.txt')
   opt :ports, "Outputs the lsist of targets and all the ports detected on that target", :default => false
   opt :edit, "Opens edit mode (type exit to close)", :default => false
   opt :online, "Shows all targets and if they are online or not", :default => false 
+  opt :scope, "Generate a BurpSuite scope file based off of a nessus file"
   opt :info, "Removes the informational findings from nessus files", :default => false 
   opt :file, "Specify the nessus file", :type => String
 end
@@ -41,6 +43,7 @@ if opts[:online] then
 end
 
 
+
 if opts[:edit] then edit_mode(opts[:file]) end
 
 if opts[:csv] then 
@@ -54,7 +57,7 @@ if opts[:targets] then
   targets_ = targets(opts[:file]) 
   puts "\n\n====Targets====\n\n"
   targets_.each do |i| 
-    puts i 
+    puts i
   end
 else
   targets_ = []
@@ -77,11 +80,16 @@ end
 if opts[:ports] then 
   open_ports = ports(opts[:file]) 
   puts "\n\n====Ports====\n\n"
-  open_ports.each do |i| 
-    puts i 
+  open_ports.each do |key, values| 
+    puts %Q(For host #{key} the following ports were discovered:\n    #{values.join("\n    ")}\n\n)
   end
 else
   open_ports = []
+end
+
+if opts[:scope] then
+  filename = scope(opts[:file]) 
+  puts "\n\n====BurpSuite Scope====\nScope file has been created and is here: #{filename}"
 end
 
 
