@@ -2,7 +2,7 @@ require "Nokogiri"
 
 def ports(file_)
 	sorted_ips = []
-	returnable = []
+	returnable = {}
 	file = File.open(file_) 
 
 	doc = Nokogiri::XML(file)
@@ -28,8 +28,10 @@ def ports(file_)
 		end
 		ports.sort_by! {|port| port.to_i}
 		unless ports.length() == 0 then
-			returnable.push(%Q(For host #{ip} the following ports were discovered:\n    #{ports.join("\n    ")}\n\n))
+			returnable[ip] = ports
 		end
 	end
 	return returnable
 end
+
+#%Q(For host #{ip} the following ports were discovered:\n    #{ports.join("\n    ")}\n\n)
