@@ -1,4 +1,4 @@
-require_relative 'ports'
+ require_relative 'ports'
 
 def scope(file)
 	scope_data = ports(file)

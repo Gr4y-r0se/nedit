@@ -8,6 +8,7 @@ require_relative 'modules/edit'
 require_relative 'modules/info'
 require_relative 'modules/online'
 require_relative 'modules/scope'
+require_relative 'modules/logs'
 
 
 #Parse commands, and display banner
@@ -18,10 +19,11 @@ banner File.read('modules/banner.txt')
   opt :csv, "Nessus CSV Output - ITHC report annexe compatible", :default => false
   opt :targets, "Outputs the list of targets in the file", :default => false
   opt :hosts, "Outputs the list of targets and their hostnames (if availble)", :default => false
-  opt :ports, "Outputs the lsist of targets and all the ports detected on that target", :default => false
+  opt :ports, "Outputs the list of targets and all the ports detected on that target", :default => false
   opt :edit, "Opens edit mode (type exit to close)", :default => false
   opt :online, "Shows all targets and if they are online or not", :default => false 
   opt :scope, "Generate a BurpSuite scope file based off of a nessus file"
+  opt :logs, "Generates a log file for an infra assessment", :default => false
   opt :info, "Removes the informational findings from nessus files", :default => false 
   opt :file, "Specify the nessus file", :type => String
 end
@@ -50,6 +52,12 @@ if opts[:csv] then
   filename = csv(opts[:file]) 
   puts "\n\n====CSV Output====\nCSV file has been created and is here: #{filename}"
 end
+
+if opts[:logs] then 
+  filename = logs(opts[:file]) 
+  puts "\n\n====Logs Output====\nLog file has been created and is here: #{filename}"
+end
+
 
 ####Deals with the target printing
 
