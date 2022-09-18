@@ -29,15 +29,15 @@ def online(file_)
  			target_fqdns.append(i)
  		end
  	end
- 	target_ips.uniq.sort_by! {|ip| ip.split('.').map{ |octet| octet.to_i} }
+ 	target_ips.uniq!
+ 	target_ips.sort_by! {|ip| ip.split('.').map{ |octet| octet.to_i} }
  	target_fqdns = target_fqdns.sort
-
-
+ 	
 	target_ips.concat(target_fqdns).each do |target|
 		if online.include?(target) then
-			all_targets.append("#{target} \t Online")
+			all_targets.push("#{target} \t Online")
 		else
-			all_targets.append("#{target} \t Offline")
+			all_targets.push("#{target} \t Offline")
 
 		end
 	end
