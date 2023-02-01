@@ -12,7 +12,7 @@ Nedit - The nessus file editor and processor
 </code></pre>
 ## How to use
 
-<img src='./images/help.png'>
+<img src='./images/help_updated.png'>
 
 The help pages (-h or --help) give all the details needed to properly utilise this tool.
 
