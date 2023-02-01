@@ -9,6 +9,7 @@ require_relative 'modules/info'
 require_relative 'modules/online'
 require_relative 'modules/scope'
 require_relative 'modules/logs'
+require_relative 'modules/scan'
 
 
 #Parse commands, and display banner
@@ -25,36 +26,37 @@ banner File.read('modules/banner.txt')
   opt :scope, "Generate a BurpSuite scope file based off of a nessus file"
   opt :logs, "Generates a log file for an infra assessment", :default => false
   opt :info, "Removes the informational findings from nessus files", :default => false 
-  opt :file, "Specify the nessus file", :type => String
+  opt :web_scan, "Performs additional active web checks on in-scope URLs", :default => false
+  opt :file, "Specify the nessus file\n\n ", :type => String
 end
 
 # Ensure mandatory parameters are present and Collisions don't happen 
 Optimist::die :file, "- that file doesn't exist :).".red if !opts[:file] or File.file?(opts[:file]) == false
 
+filename_ = File.expand_path(opts[:file])
+
 if opts[:info] then 
-  info(opts[:file]) 
-  puts "\n\n====Info Removal====\nNessus file has been updated and is here: #{opts[:file]}"
+  info(filename_) 
+  puts "\n\n====Info Removal====\nNessus file has been updated and is here: #{filename_}"
 end
 
 if opts[:online] then 
-  you_up = online(opts[:file]) 
+  you_up = online(filename_) 
   puts "\n\n====Online====\n\n"
   you_up.each do |i|
     puts i
   end
 end
 
-
-
-if opts[:edit] then edit_mode(opts[:file]) end
+if opts[:edit] then edit_mode(filename_) end
 
 if opts[:csv] then 
-  filename = csv(opts[:file]) 
+  filename = csv(filename_) 
   puts "\n\n====CSV Output====\nCSV file has been created and is here: #{filename}"
 end
 
 if opts[:logs] then 
-  filename = logs(opts[:file]) 
+  filename = logs(filename_) 
   puts "\n\n====Logs Output====\nLog file has been created and is here: #{filename}"
 end
 
@@ -62,7 +64,7 @@ end
 ####Deals with the target printing
 
 if opts[:targets] then 
-  targets_ = targets(opts[:file]) 
+  targets_ = targets(filename_) 
   puts "\n\n====Targets====\n\n"
   targets_.each do |i| 
     puts i
@@ -74,7 +76,7 @@ end
 ####Deals with the hostname printing
 
 if opts[:hosts] then 
-  hosts = hostnames(opts[:file]) 
+  hosts = hostnames(filename_) 
   puts "\n\n====Hostnames====\n\n"
   hosts.each do |i| 
     puts i 
@@ -86,7 +88,7 @@ end
 ####Deals with the port printing
 
 if opts[:ports] then 
-  open_ports = ports(opts[:file]) 
+  open_ports = ports(filename_) 
   puts "\n\n====Ports====\n\n"
   open_ports.each do |key, values| 
     puts %Q(For host #{key} the following ports were discovered:\n    #{values.join("\n    ")}\n\n)
@@ -96,21 +98,16 @@ else
 end
 
 if opts[:scope] then
-  filename = scope(opts[:file]) 
+  filename = scope(filename_) 
   puts "\n\n====BurpSuite Scope====\nScope file has been created and is here: #{filename}"
 end
 
+if opts[:web_scan] then
+  total_scanned = web_scan(filename_) 
+  puts "\n\n====Web Scans====\nScanning has been completed on #{total_scanned} targets. Output can be found here: #{filename_}"
+end
 
 puts "\n\nProgram completed. Files will be saved in the same directory as the nessus file :). \n\n".green
-
-
-
-
-
-
-
-
-
 
 
 

@@ -5,8 +5,11 @@ def info(file_)
 	file = File.open(file_) 
 
 	doc = Nokogiri::XML(file)
+	lst = doc.xpath('//ReportItem')
+	to_remove = []
+	
 	file.close
-	for i in lst do vulns.push(i['pluginName']) if i['severity'] ==  '0' end
+	for i in lst do to_remove.push(i['pluginName']) if i['severity'] ==  '0' end
 
 	to_remove.each do |vuln|
 		path_ = '//ReportItem[@pluginName="'+vuln+'"]'
