@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 
 def hostnames(file_)
 	sorted_ips = []

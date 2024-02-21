@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 
 def targets(file_)
 	sorted = []

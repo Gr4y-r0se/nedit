@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 
 
 def csv(file_)

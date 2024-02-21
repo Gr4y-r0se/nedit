@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 require 'rubygems'
 require 'ipaddr'
 

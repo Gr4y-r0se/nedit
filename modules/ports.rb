@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 
 def ports(file_)
 	sorted_ips = []

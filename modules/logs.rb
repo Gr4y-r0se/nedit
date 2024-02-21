@@ -1,4 +1,4 @@
-require "Nokogiri"
+require "nokogiri"
 
 def logs(file_)
 	sorted_ips = []
