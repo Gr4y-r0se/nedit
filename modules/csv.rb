@@ -42,7 +42,7 @@ def csv(file_)
 	lst = doc.xpath('//ReportItem')
 
 	#My gin addled brain needed this so I could make sense of the nested hash value:
-	# [0 - CVE],[1 - CVSS 3 score],[2 - Risk/Severity],[3 - Ip address],[4 - Protocol],[5 - Port],[6- Description],[7 - Remediation],[8 - External References],[9 - plugin output],[10 - hostname],[11 - rdns]
+	# [0 - CVE],[1 - CVSS 3 score],[2 - Risk/Severity],[3 - Ip address],[4 - Protocol],[5 - Socket],[6- Description],[7 - Remediation],[8 - External References],[9 - plugin output],[10 - hostname],[11 - rdns]
 
 	#This declares a default value for all the vulnerabilites, which we will later populate
 	for i in lst do 
@@ -80,6 +80,9 @@ def csv(file_)
 		for parent_element in vuln_path.xpath('..') do
 			ip = parent_element['name']
 			values[3].push(ip)
+
+			
+
 			for it in parent_element.xpath('.//tag[@name="hostname"]') do
 				hostname = it.xpath('text()')
 				if hostname != '' then 
@@ -98,25 +101,29 @@ def csv(file_)
 			end
 		end
 
+		for port in vuln_path do
+			ip = port.xpath('..')[0]['name'].to_s
+			values[5].push(ip+':'+port['port'])
+		end
+
 		for protocol in vuln_path do
 			values[4].push(protocol['protocol'])
 		end
 
-		for port in vuln_path do
-			values[5].push(port['port'])
+		for description in vuln_path.xpath('.//description') do
+			values[6] = description.xpath('text()').to_s[...6000]
 		end
 
-		for description in vuln_path.xpath('.//description') do
-			values[6] = description.xpath('text()').to_s
-		end
 		for remediation in vuln_path.xpath('.//solution') do
-			values[7] = remediation.xpath('text()').to_s
+			values[7] = remediation.xpath('text()').to_s[...6000]
 		end
+
 		for external_references in vuln_path.xpath('.//see_also') do
-			values[8].push(external_references.xpath('text()').to_s)
+			values[8].push(external_references.xpath('text()').to_s[...6000])
 		end
+
 		for plugin_output in vuln_path.xpath('.//plugin_output') do
-			values[9].push(plugin_output.xpath('text()').to_s)
+			values[9].push(plugin_output.xpath('text()').to_s[...6000].gsub('"',"'").gsub('&quot;',"'")) # This line deals with the HSTS finding rather well.
 		end
 	end
 
@@ -124,7 +131,7 @@ def csv(file_)
 
 	file.close
 
-	writeable = ['"Vulnerability","CVE","CVSS 3 score","Risk/Severity","IP address","Hostname","rDNS","Protocol","Ports","Description","Remediation","External References","Plugin Output"']
+	writeable = ['"Vulnerability","CVE","CVSS 3 score","Risk/Severity","IP address","Hostname","rDNS","Protocol","Socket","Description","Remediation","External References","Plugin Output"']
 
 	filename = "#{file_.rpartition('.')[0]}.csv"
 
