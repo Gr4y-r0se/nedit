@@ -9,11 +9,11 @@ def compliance_checks(xml,compliance_name)
 
 	for i in compliance_lst do 
 		checks[i.xpath('.//cm:compliance-check-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s] = [
-			i.xpath('.//cm:compliance-result/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s,
-			i.xpath('.//cm:compliance-benchmark-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s,
-			i.xpath('.//cm:compliance-info/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s,
-			i.xpath('.//cm:compliance-actual-value/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.gsub('"','""')[...6000],
-			i.xpath('.//cm:compliance-see-also/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s
+			i.xpath('.//cm:compliance-result/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
+			i.xpath('.//cm:compliance-benchmark-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
+			i.xpath('.//cm:compliance-info/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
+			i.xpath('.//cm:compliance-actual-value/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
+			i.xpath('.//cm:compliance-see-also/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'")
 		]
 	end
 	
