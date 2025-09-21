@@ -1,30 +1,36 @@
 require "nokogiri"
 
-def compliance_checks(xml,compliance_name)
+def compliance_checks(xml,hostdetails)
 	checks = {}
-	path_ = '//ReportItem[@pluginName="'+compliance_name+'"]'
-	compliance_lst = xml.xpath(path_)
+	for item in hostdetails do
+		hostname,compliance_name = item,hostdetails[item]
+		path_ = '//ReportHost[@name="'+hostname+'"]/ReportItem[@pluginName="'+compliance_name+'"]'
+		compliance_lst = xml.xpath(path_)
 
-	# Order is: Result, Check_Name, Benchmark_Name, Check_Info, Check_Result, See_Also
+		# Order is: Result, Check_Name, Benchmark_Name, Check_Info, Check_Result, See_Also
 
-	for i in compliance_lst do 
-		checks[i.xpath('.//cm:compliance-check-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s] = [
-			i.xpath('.//cm:compliance-result/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
-			i.xpath('.//cm:compliance-benchmark-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
-			i.xpath('.//cm:compliance-info/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
-			i.xpath('.//cm:compliance-actual-value/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'"),
-			i.xpath('.//cm:compliance-see-also/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s[...6000].gsub('"',"'").gsub('&quot;',"'")
-		]
+		for i in compliance_lst do 
+			checks[i.xpath('.//cm:compliance-check-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s] = [
+				i.xpath('.//cm:compliance-result/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'"),
+				i.xpath('.//cm:compliance-benchmark-name/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'"),
+				i.xpath('.//cm:compliance-info/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'"),
+				i.xpath('.//cm:compliance-actual-value/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'"),
+				i.xpath('.//cm:compliance-see-also/text()', {'cm' => 'http://www.nessus.org/cm'}).to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'")
+			]
+		end
+		
+
+		writeable = ['"Compliance Check Title","Result","Benchmark Name","Description","Details","See Also"']
+
+		checks.each do |title, values|
+			writeable.push(%Q("#{title}","#{values[0]}","#{values[1]}","#{values[2]}","#{values[3]}","#{values[4]}"))
+		end
+
+		filename = host + "_compliance-results.csv"
+		File.write(filename,csv_structure.join("\n"))
 	end
-	
 
-	writeable = ['"Compliance Check Title","Result","Benchmark Name","Description","Details","See Also"']
-
-	checks.each do |title, values|
-		writeable.push(%Q("#{title}","#{values[0]}","#{values[1]}","#{values[2]}","#{values[3]}","#{values[4]}"))
-	end
-
-	return writeable
+	return 
 end
 
 
@@ -34,7 +40,7 @@ def csv(file_)
 	
 	#For detecting Compliance Checks
 	compliance = false
-	check_name = ''
+	compliance_checks_record = {}
 	checks_filename = ''
 
 	doc = Nokogiri::XML(file)
@@ -48,19 +54,15 @@ def csv(file_)
 	for i in lst do 
 		if i['pluginName'].include? 'Compliance Checks' then
 			compliance = true
-			check_name = i['pluginName']
+			compliance_checks_record[i.xpath('..')[0]['name']] = i['pluginName']
 		elsif i['severity'] !=  '0' then
 			vulns[i['pluginName']] ||= [[],[],[],[],[],[],[],[],[],[],[],[]]  
 		end  
 	end
 	
 	if compliance == true then
-		puts "\n	Detected #{check_name} - Generating Additional Spreadsheet."
-		csv_structure = compliance_checks(doc,check_name)
-		
-		checks_filename = "#{file_.rpartition('.')[0]}_compliance-results.csv"
-
-		File.write(checks_filename,csv_structure.join("\n"))
+		puts "\n	Detected #{check_name} - Generating #{compliance_checks_record.length} Additional Spreadsheet(s)."
+		csv_structure = compliance_checks(doc,compliance_checks_record)
 	end
 
 	vulns.each do |vuln , values|
@@ -82,27 +84,27 @@ def csv(file_)
 			values[3].push(ip)
 
 			
-
+			#This is a janky solution - plz fi
+			original_hosthames = values[10].length
 			for it in parent_element.xpath('.//tag[@name="hostname"]') do
 				hostname = it.xpath('text()')
-				if hostname != '' then 
-					values[10].push(hostname)
-				else 
-					values[10].push("N/A")
-				end
+				values[10].push(hostname)
 			end
+			if original_hosthames == values[10].length then
+				values[10].push(ip)
+			end
+			original_rdns = values[11].length
 			for it in parent_element.xpath('.//tag[@name="host-rdns"]') do
-				hostname = it.xpath('text()')
-				if hostname != '' then 
-					values[11].push(hostname)
-				else 
-					values[11].push("N/A")
-				end
+				rdns = it.xpath('text()')
+				values[11].push(rdns)
+			end
+			if original_rdns == values[11].length then
+				values[11].push(ip)
 			end
 		end
 
 		for port in vuln_path do
-			ip = port.xpath('..')[0]['name'].to_s
+			ip = port.xpath('..')[0]['name'].to_s.strip
 			values[5].push(ip+':'+port['port'])
 		end
 
@@ -111,19 +113,19 @@ def csv(file_)
 		end
 
 		for description in vuln_path.xpath('.//description') do
-			values[6] = description.xpath('text()').to_s[...6000]
+			values[6] = description.xpath('text()').to_s.strip[...6000]
 		end
 
 		for remediation in vuln_path.xpath('.//solution') do
-			values[7] = remediation.xpath('text()').to_s[...6000]
+			values[7] = remediation.xpath('text()').to_s.strip[...6000]
 		end
 
 		for external_references in vuln_path.xpath('.//see_also') do
-			values[8].push(external_references.xpath('text()').to_s[...6000])
+			values[8].push(external_references.xpath('text()').to_s.strip[...6000])
 		end
 
 		for plugin_output in vuln_path.xpath('.//plugin_output') do
-			values[9].push(plugin_output.xpath('text()').to_s[...6000].gsub('"',"'").gsub('&quot;',"'")) # This line deals with the HSTS finding rather well.
+			values[9].push(plugin_output.xpath('text()').to_s.strip[...6000].gsub('"',"'").gsub('&quot;',"'")) # This line deals with the HSTS finding rather well.
 		end
 	end
 
